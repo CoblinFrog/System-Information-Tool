@@ -22,5 +22,10 @@ root.title("System Information Tool")
 
 label1 = ttk.Label(root, text="Please choose below what you would like to be packaged into the .zip file:")
 option1 = ttk.Checkbutton(root, text="Minidump/Crash Files", variable=crashFiles, onvalue=True, offvalue=False)
+option2 = ttk.Checkbutton(root, text="Hardware Information", variable=hardwareInfo, onvalue=True, offvalue=False)
+option3 = ttk.Checkbutton(root, text="Windows Operating System Information", variable=osInfo, onvalue=True, offvalue=False)
+option4 = ttk.Checkbutton(root, text="Driver Information", variable=driverInfo, onvalue=True, offvalue=False)
+option5 = ttk.Checkbutton(root, text="Connected USB Devices", variable=usbDevices, onvalue=True, offvalue=False)
+option6 = ttk.Checkbutton(root, text="Run Windows Diagnostic Software", variable=runChecks, onvalue=True, offvalue=False)
 
 root.mainloop()
