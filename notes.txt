@@ -1,0 +1,9 @@
+- use shutil module for zip and folder access
+- find python executable packager
+- run with administrator when opened
+- progress bar
+- access drivers and version
+- msinfo32 into txt file cleanly formatted
+- find if os and sys modules any use
+- create popup to help describe each checkbox and their uses
+- error handler (when no box checked, no minidump found, same name when file?)
