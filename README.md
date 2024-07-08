@@ -8,6 +8,6 @@ This tool will package the following:
 - Minidump files (":(" screen files)
 - Peripherals such as keyboard, mice, headphones, and other USB/connected devices
 
-This tool will also run basic and harmless commands to check system integrity and repair any corrupted files. You may also choose specifically what to package. 
+This tool will also allow you to specify which to package.
 
 Made by Collin Fong

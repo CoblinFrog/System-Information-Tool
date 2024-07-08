@@ -15,7 +15,6 @@ hardwareInfo = BooleanVar(root, False)
 osInfo = BooleanVar(root, False)
 driverInfo = BooleanVar(root, False)
 usbDevices = BooleanVar(root, False)
-runChecks = BooleanVar(root, False)
 
 root.geometry("600x400")
 root.title("System Information Tool")
@@ -26,6 +25,5 @@ option2 = ttk.Checkbutton(root, text="Hardware Information", variable=hardwareIn
 option3 = ttk.Checkbutton(root, text="Windows Operating System Information", variable=osInfo, onvalue=True, offvalue=False)
 option4 = ttk.Checkbutton(root, text="Driver Information", variable=driverInfo, onvalue=True, offvalue=False)
 option5 = ttk.Checkbutton(root, text="Connected USB Devices", variable=usbDevices, onvalue=True, offvalue=False)
-option6 = ttk.Checkbutton(root, text="Run Windows Diagnostic Software", variable=runChecks, onvalue=True, offvalue=False)
 
 root.mainloop()
