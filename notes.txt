@@ -7,3 +7,5 @@
 - find if os and sys modules any use
 - create popup to help describe each checkbox and their uses
 - error handler (when no box checked, no minidump found, same name when file?)
+- custom name for zip file
+- radio button to choose style
