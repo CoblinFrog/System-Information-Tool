@@ -1,7 +1,7 @@
 - use shutil module for zip and folder access
 - find python executable packager
 - run with administrator when opened
-- progress bar
+- progress bar(need to learn this)
 - access drivers and version
 - msinfo32 into txt file cleanly formatted
 - find if os and sys modules any use
@@ -9,3 +9,4 @@
 - error handler (when no box checked, no minidump found, same name when file?)
 - custom name for zip file
 - radio button to choose style
+- console to show what is happening
