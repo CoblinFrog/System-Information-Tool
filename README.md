@@ -1,4 +1,4 @@
-# System-Information-Tool (Beta)
+# System-Information-Tool
 A tool designed to package important system information into a .zip file to assist with computer repair.
 
 This tool will package the following:
@@ -9,7 +9,5 @@ This tool will package the following:
 - Peripherals such as keyboard, mice, headphones, and other USB/connected devices
 
 This tool will also allow you to specify which to package.
-
-WARNING: This program is also in early development stages, so expect bugs and use at your own risk.
 
 Made by Collin Fong
