@@ -13,3 +13,9 @@ class fileDuplicate(Exception):
     def __init__(self, message="A file by that name is already created"):
         self.message = message
         super().__init__(message)
+
+class noneSelected(Exception):
+    def __init__(self, message="Please select at least one option"):
+        self.message = message
+        super().__init__(message)
+
