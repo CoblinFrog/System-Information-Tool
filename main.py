@@ -15,6 +15,7 @@ filename = datetime.now().strftime('%m%d%Y-%I%M%S%p-System-Information-Files')
 #UI Elements
 root = Tk()
 root.resizable(False, False)
+root.iconbitmap('Resources/favicon.ico')
 frame = ttk.Frame(root, padding=20)
 frame.grid(column=0, row=0)
 
@@ -27,6 +28,7 @@ usbDevices = BooleanVar(root, False)
 root.title("System Information Tool")
 
 def crash():
+    print("Checking for Downloads folder")
     downloadsPath = "None"
     if os.path.exists(rf"C:\Users\{user}\Downloads"):
         downloadsPath = rf"C:\Users\{user}\Downloads"
@@ -34,16 +36,19 @@ def crash():
         downloadsPath = rf"C:\Users\OneDrive\{user}\Downloads"
     else:
         raise downloadNotFound
+    print("Downloads folder found")
 
+    print("Checking for Minidumps folder")
     if os.path.exists(r"C:\Windows\Minidump"):
         pass
     else:
         raise noMiniDump
+    print("Minidump folder found")
 
-    #try:
-    shutil.copytree(r"C:\Users\cobli\Downloads\test", rf"C:\Users\{user}\Downloads\{filename}\Minidumps")
-    #except:
-    #    raise fileDuplicate
+    try:
+        shutil.copytree(r"C:\Windows\Minidump", rf"{downloadsPath}\{filename}\Minidumps")
+    except FileExistsError:
+        raise fileDuplicate
 
 def hardware():
     print("Hi")

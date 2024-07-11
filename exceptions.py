@@ -19,3 +19,8 @@ class noneSelected(Exception):
         self.message = message
         super().__init__(message)
 
+class insufficientPermissions(Exception):
+    def __init__(self, message="This program does not have the administrator privileges it needs to run"):
+        self.message = message
+        super().__init__(message)
+
