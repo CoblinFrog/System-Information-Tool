@@ -12,3 +12,4 @@
 - console to show what is happening
 - checks to see if program can work, check if ran with admin
 - learn classes
+- platform module for system information
