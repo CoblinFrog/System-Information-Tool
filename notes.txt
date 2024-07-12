@@ -14,3 +14,5 @@
 - learn classes
 - platform module for system information
 - fix options false checker
+- make it so it can be used system itself
+- simple and readable mode for users to check system specs
