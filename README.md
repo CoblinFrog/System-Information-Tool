@@ -1,3 +1,5 @@
+![banner.png](Resources%2Fbanner.png)
+
 # System-Information-Tool (Beta)
 A tool designed to package important system information into a .zip file to assist with computer repair.
 
