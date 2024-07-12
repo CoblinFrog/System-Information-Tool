@@ -113,3 +113,4 @@ option5.grid(sticky=W)
 runButton.grid(sticky=E, row=7, pady=(10, 0))
 infoButton.grid(sticky=E, row=7, column=1, pady=(10, 0))
 root.mainloop()
+
