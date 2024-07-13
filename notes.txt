@@ -16,3 +16,5 @@
 - fix options false checker
 - make it so it can be used system itself
 - simple and readable mode for users to check system specs
+- help page
+- spawn error window on top of old window
