@@ -13,8 +13,6 @@ from Fetchers.hardwarefetcher import *
 from Fetchers.driverfetcher import *
 from Fetchers.usbdevicefetcher import *
 
-user = os.getlogin()
-
 #UI Elements
 root = Tk()
 root.resizable(False, False)
