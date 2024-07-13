@@ -1,12 +1,7 @@
-import subprocess
-import os
 from tkinter import *
 from tkinter import ttk
-import shutil
 from datetime import datetime
 
-from exceptions import *
-from checks import *
 from Fetchers.crashfetcher import *
 from Fetchers.windowsfetcher import *
 from Fetchers.hardwarefetcher import *
