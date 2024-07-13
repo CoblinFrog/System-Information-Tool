@@ -9,3 +9,4 @@ def crash(filename):
         shutil.copytree(r"C:\Windows\Minidump", rf"{downloadsCheck()}\{filename}\Minidumps")
     except FileExistsError:
         raise fileDuplicate
+

@@ -5,6 +5,8 @@ from exceptions import *
 
 user = os.getlogin()
 
+
+
 def check():
     print("Checking operating system")
     if not platform.system() == "Windows":

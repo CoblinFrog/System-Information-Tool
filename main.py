@@ -1,5 +1,3 @@
-from tkinter import *
-from tkinter import ttk
 from datetime import datetime
 
 from Fetchers.crashfetcher import *
