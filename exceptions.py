@@ -24,3 +24,8 @@ class insufficientPermissions(Exception):
         self.message = message
         super().__init__(message)
 
+class notWindows(Exception):
+    def __init__(self, message="This program is meant for only Windows, an incompatible operating system was detected"):
+        self.message = message
+        super().__init__(message)
+

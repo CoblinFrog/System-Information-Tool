@@ -3,14 +3,17 @@ import os
 from tkinter import *
 from tkinter import ttk
 import shutil
-import zipfile
 from datetime import datetime
 
 from exceptions import *
+from checks import *
+from Fetchers.crashfetcher import *
+from Fetchers.windowsfetcher import *
+from Fetchers.hardwarefetcher import *
+from Fetchers.driverfetcher import *
+from Fetchers.usbdevicefetcher import *
 
 user = os.getlogin()
-
-filename = datetime.now().strftime('%m%d%Y-%I%M%S%p-System-Information-Files')
 
 #UI Elements
 root = Tk()
@@ -27,73 +30,22 @@ usbDevices = BooleanVar(root, False)
 
 root.title("System Information Tool")
 
-def crash():
-    print("Checking for Downloads folder")
-    downloadsPath = "None"
-    if os.path.exists(rf"C:\Users\{user}\Downloads"):
-        downloadsPath = rf"C:\Users\{user}\Downloads"
-    elif os.path.exists(rf"C:\Users\OneDrive\{user}\Downloads"):
-        downloadsPath = rf"C:\Users\OneDrive\{user}\Downloads"
-    else:
-        raise downloadNotFound
-    print("Downloads folder found")
-
-    print("Checking for Minidumps folder")
-    if os.path.exists(r"C:\Windows\Minidump"):
-        pass
-    else:
-        raise noMiniDump
-    print("Minidump folder found")
-
-    try:
-        shutil.copytree(r"C:\Windows\Minidump", rf"{downloadsPath}\{filename}\Minidumps")
-    except FileExistsError:
-        raise fileDuplicate
-
-def hardware():
-    print("Hi")
-
-def windowsos():
-    print("Hi")
-
-def drivers():
-    print("Hi")
-
-def usb():
-    print("Hi")
-
-def optionsFalse():
-    falseOptions = 0
-    if not crashFiles.get():
-        falseOptions = falseOptions + 1
-    if not hardwareInfo.get():
-        falseOptions = falseOptions + 1
-    if not osInfo.get():
-        falseOptions = falseOptions + 1
-    if not driverInfo.get():
-        falseOptions = falseOptions + 1
-    if not usbDevices.get():
-        falseOptions = falseOptions + 1
-    if falseOptions == 5:
-        return False
-    else:
-        return True
-
 def runFunction():
+    filename = datetime.now().strftime('%m%d%Y-%I%M%S%p-System-Information-Files')
     if crashFiles.get():
-        crash()
+        crash(filename)
     if hardwareInfo.get():
         hardware()
     if osInfo.get():
-        windowsos()
+        windows()
     if driverInfo.get():
         drivers()
     if usbDevices.get():
         usb()
-    elif not optionsFalse():
+    elif optionsChecker(crashFiles, hardwareInfo, osInfo, driverInfo, usbDevices):
         raise noneSelected
 
-label1 = ttk.Label(frame, text="Please choose below what you would like to be packaged into the .zip file:")
+label1 = ttk.Label(frame, text="Please choose below what you would like to be packaged into the folder")
 label1.config(font=("TkDefaultFont", 11))
 option1 = ttk.Checkbutton(frame, text="Minidump/Crash Files", variable=crashFiles, onvalue=True, offvalue=False)
 option2 = ttk.Checkbutton(frame, text="Hardware Information", variable=hardwareInfo, onvalue=True, offvalue=False)
