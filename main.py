@@ -40,6 +40,7 @@ def runFunction():
         drivers(directory)
     if usbDevices.get():
         usb(directory)
+    popup("Process completed")
 
 def help():
     helpwin = Tk()
