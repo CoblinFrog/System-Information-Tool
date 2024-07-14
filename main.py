@@ -45,7 +45,10 @@ def help():
     helpwin = Tk()
     helpwin.resizable(False, False)
     helpwin.iconbitmap('Resources/favicon.ico')
-    helpfrm = ttk.frame(helpwin, padding=20)
+    helpwin.geometry("500x300")
+    helpwin.title("Help")
+    helpfrm = ttk.Frame(helpwin, padding=20)
+
 
 label1 = ttk.Label(frame, text="Please choose below what you would like to be packaged into the folder")
 label1.config(font=("TkDefaultFont", 11))

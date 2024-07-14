@@ -8,11 +8,14 @@ Once you have the app running, there will be options to select what you want to 
 
 ## FAQ
 Q: What options are there for system information?
-A: The tool will put the following into a folder:
+A: The tool will have the option to put the following into a folder:
 - Hardware information such as the speeds, name, type, and more of your GPU, CPU, motherboard, RAM, etc.
 - Drivers and their versions
 - Windows version and build
 - Minidump files (":(" screen files)
 - Peripherals such as keyboard, mice, headphones, and other USB/connected devices
 
-WARNING: This program is also in its early development stages, so expect bugs and instability, use at your own risk.
+Q: How will the system information be shown?
+A: The system information about hardware, drivers, etc. will be put into .txt files within the folder.
+
+#### WARNING: This program is also in its early development stages, so expect bugs and instability, use at your own risk.
