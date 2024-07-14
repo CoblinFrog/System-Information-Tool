@@ -1,3 +1,0 @@
-
-def windows():
-    print("Hi")

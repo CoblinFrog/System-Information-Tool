@@ -1,3 +1,3 @@
 
-def hardware():
+def hardware(directory):
     print("Hi")

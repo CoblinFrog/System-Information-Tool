@@ -1,7 +1,8 @@
-from datetime import datetime
+import os
+import datetime
 
 from Fetchers.crashfetcher import *
-from Fetchers.windowsfetcher import *
+from Fetchers.osfetcher import *
 from Fetchers.hardwarefetcher import *
 from Fetchers.driverfetcher import *
 from Fetchers.usbdevicefetcher import *
@@ -22,19 +23,23 @@ usbDevices = BooleanVar(root, False)
 root.title("System Information Tool")
 
 def runFunction():
-    filename = datetime.now().strftime('%m%d%Y-%I%M%S%p-System-Information-Files')
+    filename = datetime.datetime.now().strftime('%m%d%Y-%I%M%S%p-System-Information-Files')
+    directory = rf"{downloadsCheck()}\{filename}"
+    if optionsChecker(crashFiles, hardwareInfo, osInfo, driverInfo, usbDevices):
+        raise noneSelected
+    else:
+        os.makedirs(directory)
+
     if crashFiles.get():
-        crash(filename)
+        crash(directory)
     if hardwareInfo.get():
-        hardware()
+        hardware(directory)
     if osInfo.get():
-        windows()
+        operatingsystem(directory)
     if driverInfo.get():
         drivers()
     if usbDevices.get():
         usb()
-    elif optionsChecker(crashFiles, hardwareInfo, osInfo, driverInfo, usbDevices):
-        raise noneSelected
 
 label1 = ttk.Label(frame, text="Please choose below what you would like to be packaged into the folder")
 label1.config(font=("TkDefaultFont", 11))

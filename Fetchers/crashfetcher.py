@@ -1,12 +1,12 @@
 import shutil
 
-from exceptions import *
+from exceptions import fileDuplicate
 from checks import *
 
-def crash(filename):
+def crash(directory):
     minidumpCheck()
     try:
-        shutil.copytree(r"C:\Windows\Minidump", rf"{downloadsCheck()}\{filename}\Minidumps")
+        shutil.copytree(r"C:\Windows\Minidump", rf"{directory}\Minidumps")
     except FileExistsError:
         raise fileDuplicate
 
