@@ -37,9 +37,15 @@ def runFunction():
     if osInfo.get():
         operatingsystem(directory)
     if driverInfo.get():
-        drivers()
+        drivers(directory)
     if usbDevices.get():
-        usb()
+        usb(directory)
+
+def help():
+    helpwin = Tk()
+    helpwin.resizable(False, False)
+    helpwin.iconbitmap('Resources/favicon.ico')
+    helpfrm = ttk.frame(helpwin, padding=20)
 
 label1 = ttk.Label(frame, text="Please choose below what you would like to be packaged into the folder")
 label1.config(font=("TkDefaultFont", 11))
@@ -50,7 +56,7 @@ option4 = ttk.Checkbutton(frame, text="Driver Information", variable=driverInfo,
 option5 = ttk.Checkbutton(frame, text="Connected USB Devices", variable=usbDevices, onvalue=True, offvalue=False)
 
 runButton = ttk.Button(frame, text="Start", command=runFunction)
-infoButton = ttk.Button(frame, text="Help")
+infoButton = ttk.Button(frame, text="Help", command=help)
 
 label1.grid(sticky=W, pady=(0, 5))
 option1.grid(sticky=W)

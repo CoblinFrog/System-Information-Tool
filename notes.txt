@@ -18,3 +18,4 @@
 - simple and readable mode for users to check system specs
 - help page
 - spawn error window on top of old window
+- check gpu type to decide which py module to use

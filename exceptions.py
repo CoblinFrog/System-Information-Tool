@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk
 
 def errorPopup(errorText):
-    def close():
+    def errorclose():
         popup.destroy()
     popup = Tk()
     popup.title("Error")
@@ -13,7 +13,7 @@ def errorPopup(errorText):
     popupFrame.grid(column=0, row=0)
     pLabel = ttk.Label(popupFrame, text=errorText)
     pLabel.config(font=("TkDefaultFont", 10))
-    pButton = ttk.Button(popupFrame, text="Ok", command=close)
+    pButton = ttk.Button(popupFrame, text="Ok", command=errorclose)
     pLabel.grid(sticky=W)
     pButton.grid(sticky=E, pady=(10,0))
     popup.mainloop()
