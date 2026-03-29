@@ -1,6 +1,6 @@
 ![banner.png](Resources%2Fbanner.png)
 
-# System-Information-Tool (Beta) 
+# System-Information-Tool (In Progress) 
 Welcome to the System Information Tool! A simple Python-based app to help show information about your Windows system. This is open source, so the code is attached above. However, if you wish to just run the app, go to the Releases page to download and run the executable.
 
 ## Usage
