@@ -3,3 +3,6 @@ class BaseEngine:
 
     def get_cpu_info(self) -> dict:
         raise NotImplementedError
+
+    def get_memory_info(self) -> dict:
+        raise NotImplementedError
