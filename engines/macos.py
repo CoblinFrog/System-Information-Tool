@@ -20,11 +20,30 @@ class MacOS(BaseEngine):
             "l1_data_cache": int(subprocess.check_output(["sysctl", "-n", "hw.l1dcachesize"]).decode().strip())//1024,
             "l1_total_cache" : (int(subprocess.check_output(["sysctl", "-n", "hw.l1icachesize"]).decode().strip()) + int(subprocess.check_output(["sysctl", "-n", "hw.l1dcachesize"]).decode().strip()))//1024,
             "l2_cache" : int(subprocess.check_output(["sysctl", "-n", "hw.l2cachesize"]).decode().strip())//1024
+
+        }
+
+    def get_gpu_info(self) -> dict:
+        return {
+            "brand" : subprocess.check_output("system_profiler SPDisplaysDataType | awk -F: '/Chipset Model/ {print $2}'", shell=True).decode().strip(),
         }
 
     def get_memory_info(self) -> dict:
         return {
-            "memory_total": int(subprocess.check_output(["sysctl", "-n", "hw.memsize"]).decode().strip())//(1024 ** 3),
+            "total_memory": int(subprocess.check_output(["sysctl", "-n", "hw.memsize"]).decode().strip())//(1024 ** 3),
+            "memory_type" : subprocess.check_output("system_profiler SPMemoryDataType | awk -F: '/Type/ {print $2}'", shell=True).decode().strip(),
+            "memory_manufacturer" : subprocess.check_output("system_profiler SPMemoryDataType | awk -F: '/Manufacturer/ {print $2}'", shell=True).decode().strip()
+
         }
 
+    def get_misc_info(self) -> dict:
+        return {
+            "model_identifier": "",
+            "serial_number": ""
+        }
 
+    def get_battery_info(self) -> dict:
+        return {
+            "current_cycle_count" : subprocess.check_output("system_profiler SPPowerDataType | awk -F: '/Cycle Count/ {print $2}'", shell=True).decode().strip(),
+            "battery_health" : subprocess.check_output("system_profiler SPPowerDataType | awk -F: '/Maximum Capacity/ {print $2}'", shell=True).decode().strip(),
+        }
