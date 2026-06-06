@@ -11,7 +11,9 @@ class MacOS(BaseEngine):
             frequency = "Unavailable"
 
         return {
-            "core_count": f"{subprocess.check_output(["sysctl", "-n", "hw.physicalcpu"]).decode().strip()} ({subprocess.check_output(["sysctl", "-n", "hw.perflevel0.physicalcpu"]).decode().strip()} Performance, {subprocess.check_output(["sysctl", "-n", "hw.perflevel1.physicalcpu"]).decode().strip()} Efficiency)",
+            "core_count": subprocess.check_output(["sysctl", "-n", "hw.physicalcpu"]).decode().strip(),
+            "p_core_count" : subprocess.check_output(["sysctl", "-n", "hw.perflevel0.physicalcpu"]).decode().strip(),
+            "e_core_count" : subprocess.check_output(["sysctl", "-n", "hw.perflevel1.physicalcpu"]).decode().strip(),
             "brand": subprocess.check_output(["sysctl", "-n", "machdep.cpu.brand_string"]).decode().strip(),
             "architecture": subprocess.check_output(["uname", "-m"]).decode().strip(),
             "frequency" : frequency,
