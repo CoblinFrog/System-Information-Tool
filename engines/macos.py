@@ -10,6 +10,7 @@ class MacOS(BaseEngine):
         if frequency == "":
             frequency = "Unavailable"
 
+        #might wanna try different process, take entire entry, format and index it individually. might be more "secure" and optimized that way.
         return {
             "core_count": subprocess.check_output(["sysctl", "-n", "hw.physicalcpu"]).decode().strip(),
             "p_core_count" : subprocess.check_output(["sysctl", "-n", "hw.perflevel0.physicalcpu"]).decode().strip(),
@@ -40,12 +41,12 @@ class MacOS(BaseEngine):
 
     def get_misc_info(self) -> dict:
         return {
-            "model_identifier": "",
+            "model_identifier": subprocess.check_output("system_profiler SPHardwareDataType | awk -F: '/Model Identifier:/ {print $2}'", shell=True).decode().strip(),
             "serial_number": ""
         }
 
     def get_battery_info(self) -> dict:
         return {
             "current_cycle_count" : subprocess.check_output("system_profiler SPPowerDataType | awk -F: '/Cycle Count/ {print $2}'", shell=True).decode().strip(),
-            "battery_health" : subprocess.check_output("system_profiler SPPowerDataType | awk -F: '/Maximum Capacity/ {print $2}'", shell=True).decode().strip(),
+            "battery_health" : subprocess.check_output("system_profiler SPHardwareDataType | awk -F: '/Maximum Capacity/ {print $2}'", shell=True).decode().strip(),
         }
