@@ -46,11 +46,17 @@ class MacOS(BaseEngine):
         }
 
     def get_gpu_info(self) -> dict:
+        raw_info = self._run_cmd(["system_profiler", "SPDisplaysDataType"])
+        gpu_info = {}
+
         return {
-            "brand" : subprocess.check_output("system_profiler SPDisplaysDataType | awk -F: '/Chipset Model/ {print $2}'", shell=True).decode().strip(),
+            "brand" : ""
         }
 
     def get_memory_info(self) -> dict:
+        raw_info = self._run_cmd(["system_profiler", "SPMemoryDataType"])
+        memory_info = {}
+
         return {
             "total_memory": int(subprocess.check_output(["sysctl", "-n", "hw.memsize"]).decode().strip())//(1024 ** 3),
             "memory_type" : subprocess.check_output("system_profiler SPMemoryDataType | awk -F: '/Type/ {print $2}'", shell=True).decode().strip(),
@@ -59,12 +65,18 @@ class MacOS(BaseEngine):
         }
 
     def get_misc_info(self) -> dict:
+        raw_info = ""
+        misc_info = {}
+
         return {
             "model_identifier": subprocess.check_output("system_profiler SPHardwareDataType | awk -F: '/Model Identifier:/ {print $2}'", shell=True).decode().strip(),
             "serial_number": ""
         }
 
     def get_battery_info(self) -> dict:
+        raw_info = self._run_cmd(["system_profiler", "SPBatteryDataType"])
+        battery_info = {}
+
         return {
             "current_cycle_count" : subprocess.check_output("system_profiler SPPowerDataType | awk -F: '/Cycle Count/ {print $2}'", shell=True).decode().strip(),
             "battery_health" : subprocess.check_output("system_profiler SPHardwareDataType | awk -F: '/Maximum Capacity/ {print $2}'", shell=True).decode().strip(),
