@@ -1,6 +1,8 @@
 from engines.base import BaseEngine
 import subprocess
 
+#Consider formatting to .json files.
+#Create lookup tables too.
 def _run_cmd(args: list) -> dict:
     sorted_info = {}
 
@@ -28,6 +30,7 @@ class MacOS(BaseEngine):
             l2 = int(cpu_info.get("hw.l2cachesize")) // 1024
         except ValueError, TypeError:
             l1i, l1d, l2 = 0, 0, 0
+
 
         return {
             "core_count": cpu_info.get("hw.physicalcpu"),
@@ -71,6 +74,12 @@ class MacOS(BaseEngine):
             "battery_condition": battery_info.get("Condition"),
         }
 
+    def get_storage_info(self) -> dict:
+        #Check NVMe and SATA.
+        return {
+
+        }
+
     #Need to figure out what counts as misc info and what can be its own thing.
     def get_misc_info(self) -> dict:
         model_info = _run_cmd(["system_profiler", "SPHardwareDataType"])
@@ -80,13 +89,16 @@ class MacOS(BaseEngine):
             "model_identifier": model_info.get("Model Identifier"),
             "model_name": model_info.get("Model Name"),
             "model_number": model_info.get("Model Number"),
+            "serial_number" : model_info.get("Serial Number (system)"),
+            "firmware_version": model_info.get("OS Loader Version"),
             "os_version": f"{os_info.get("ProductName")} {os_info.get("ProductVersion")}",
             "os_build": os_info.get("BuildVersion"),
+            "kernel_version": subprocess.check_output(["uname", "-r"], stderr=subprocess.DEVNULL).decode().strip(),
         }
 
     #Add storage systems, need to be aware about multiple drives installed and filesystems.
     #Add WiFi, Ethernet, and Bluetooth stuff?
     #Logs?
     #Audio devices?
-    #Check firmware and os versions.
+
     #Add usb and thunderbolt ports?
