@@ -1,21 +1,30 @@
+import json
+
 from engines.base import BaseEngine
 import subprocess
 
-#Consider formatting to .json files.
-#Create lookup tables too.
-def _run_cmd(args: list) -> dict:
-    sorted_info = {}
+#Add proper exception handling.
+def _run_cmd(args: list, j: bool = False) -> dict:
+    if j:
+        try:
+            args = args + ["-json"]
+            raw_output = subprocess.check_output(args, stderr=subprocess.DEVNULL).decode().strip()
+            return json.loads(raw_output)
+        except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError):
+            return {}
+    else:
+        sorted_info = {}
 
-    try:
-        raw_output = subprocess.check_output(args, stderr=subprocess.DEVNULL).decode().strip()
-    except subprocess.CalledProcessError, FileNotFoundError:
-        raw_output = ""
+        try:
+            raw_output = subprocess.check_output(args, stderr=subprocess.DEVNULL).decode().strip()
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            raw_output = ""
 
-    for line in raw_output.splitlines():
-        if ":" in line:
-            key, val = line.split(":", 1)
-            sorted_info[key.strip()] = val.strip()
-    return sorted_info
+        for line in raw_output.splitlines():
+            if ":" in line:
+                key, val = line.split(":", 1)
+                sorted_info[key.strip()] = val.strip()
+        return sorted_info
 
 class MacOS(BaseEngine):
     def __init__(self):
@@ -45,16 +54,54 @@ class MacOS(BaseEngine):
             "l2_cache" : l2
         }
 
-    #This might break when multiple GPUs are connected and have to add support for display detection later.
     def get_graphics_info(self) -> dict:
-        graphics_info = _run_cmd(["system_profiler", "SPDisplaysDataType"])
-
-        return {
-            "brand" : graphics_info.get("Chipset Model"),
-            "manufacturer": graphics_info.get("Vendor"),
-            "metal_support": graphics_info.get("Metal Support"),
+        graphics_info = _run_cmd(["system_profiler", "SPDisplaysDataType"], True).get("SPDisplaysDataType", [])
+        gpus = []
+        displays = []
+        metal_versions = {
+            "spdisplays_metal1": "Metal 1",
+            "spdisplays_metal2": "Metal 2",
+            "spdisplays_metal3": "Metal 3",
+            "spdisplays_metal4": "Metal 4",
+            "spdisplays_metal5": "Metal 5",
+        }
+        main_display_values = {
+            "spdisplays_yes": "Yes",
+            "spdisplays_no": "No",
         }
 
+        for gpu in graphics_info:
+            metal_output = gpu.get("spdisplays_mtlgpufamilysupport", "")
+            metal = metal_versions.get(
+                metal_output, metal_output or "Metal Unsupported"
+            )
+            gpus.append(
+                {
+                    "brand": gpu.get("_name", "Unknown brand"),
+                    "manufacturer": gpu.get("spdisplays_vendor", "Unknown manufacturer")[13:],
+                    "metal_support": metal,
+                    "vram": gpu.get("spdisplays_vram", "Unavailable"),
+                }
+            )
+
+            connected_displays = gpu.get("spdisplays_ndrvs", [])
+            for display in connected_displays:
+                main_display_output = display.get("spdisplays_main", "Unknown")
+                main_display = main_display_values.get(
+                    main_display_output, main_display_output or "Metal Unsupported"
+                )
+                displays.append(
+                    {
+                        "brand": display.get("_name", "Unknown brand"),
+                        "display_type" : display.get("spdisplays_display_type", "Unknown")[11:],
+                        "resolution" : display.get("_spdisplays_pixels", "Unknown resolution"),
+                        "is_main_display" : main_display,
+                    }
+                )
+
+        return {"gpus": gpus, "displays": displays}
+
+    #This could break on macs with multiple memory modules, need to find what the output would be like.
     def get_memory_info(self) -> dict:
         memory_info = _run_cmd(["system_profiler", "SPMemoryDataType"])
 
@@ -76,6 +123,7 @@ class MacOS(BaseEngine):
 
     def get_storage_info(self) -> dict:
         #Check NVMe and SATA.
+        nvme = _run_cmd(["system_profiler", "SPNVMeDataType"], True).get("SPNVMeDataType", [])
         return {
 
         }
