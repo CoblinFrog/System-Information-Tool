@@ -123,30 +123,35 @@ class MacOS(BaseEngine):
 
     def get_storage_info(self) -> dict:
         #Check NVMe and SATA.
-        nvme = _run_cmd(["system_profiler", "SPNVMeDataType"], True).get("SPNVMeDataType", [])
+        nvme_info = _run_cmd(["system_profiler", "SPNVMeDataType"], True).get("SPNVMeDataType", [])
         return {
 
         }
 
-    #Need to figure out what counts as misc info and what can be its own thing.
-    def get_misc_info(self) -> dict:
-        model_info = _run_cmd(["system_profiler", "SPHardwareDataType"])
+    def get_os_info(self) -> dict:
         os_info = _run_cmd(["sw_vers"])
+
+        return {
+            #"firmware_version": subprocess.check_output(["uname", "-m"], stderr=subprocess.DEVNULL).decode().strip(),
+            #Need optimized firmware fetcher.
+            "os_version": f"{os_info.get("ProductName")} {os_info.get("ProductVersion")}",
+            "os_build": os_info.get("BuildVersion"),
+            "kernel_version": subprocess.check_output(["uname", "-r"], stderr=subprocess.DEVNULL).decode().strip(),
+        }
+
+    #Need to figure out what counts as misc info and what can be its own thing, may do model and os seperate.
+    def get_model_info(self) -> dict:
+        model_info = _run_cmd(["system_profiler", "SPHardwareDataType"])
 
         return {
             "model_identifier": model_info.get("Model Identifier"),
             "model_name": model_info.get("Model Name"),
             "model_number": model_info.get("Model Number"),
             "serial_number" : model_info.get("Serial Number (system)"),
-            "firmware_version": model_info.get("OS Loader Version"),
-            "os_version": f"{os_info.get("ProductName")} {os_info.get("ProductVersion")}",
-            "os_build": os_info.get("BuildVersion"),
-            "kernel_version": subprocess.check_output(["uname", "-r"], stderr=subprocess.DEVNULL).decode().strip(),
         }
 
     #Add storage systems, need to be aware about multiple drives installed and filesystems.
     #Add WiFi, Ethernet, and Bluetooth stuff?
     #Logs?
     #Audio devices?
-
     #Add usb and thunderbolt ports?
