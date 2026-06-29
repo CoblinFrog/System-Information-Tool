@@ -13,5 +13,11 @@ class BaseEngine:
     def get_battery_info(self) -> dict:
         raise NotImplementedError
 
-    def get_misc_info(self) -> dict:
+    def get_storage_info(self) -> dict:
+        raise NotImplementedError
+
+    def get_os_info(self) -> dict:
+        raise NotImplementedError
+
+    def get_model_info(self) -> dict:
         raise NotImplementedError

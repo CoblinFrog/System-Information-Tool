@@ -3,7 +3,7 @@ import json
 from engines.base import BaseEngine
 import subprocess
 
-#Add proper exception handling.
+#Add proper exception handling, fix unknown stuff.
 def _run_cmd(args: list, j: bool = False) -> dict:
     if j:
         try:
@@ -39,7 +39,6 @@ class MacOS(BaseEngine):
             l2 = int(cpu_info.get("hw.l2cachesize")) // 1024
         except ValueError, TypeError:
             l1i, l1d, l2 = 0, 0, 0
-
 
         return {
             "core_count": cpu_info.get("hw.physicalcpu"),
@@ -77,10 +76,10 @@ class MacOS(BaseEngine):
             )
             gpus.append(
                 {
-                    "brand": gpu.get("_name", "Unknown brand"),
+                    "name": gpu.get("_name", "Unknown"),
                     "manufacturer": gpu.get("spdisplays_vendor", "Unknown manufacturer")[13:],
                     "metal_support": metal,
-                    "vram": gpu.get("spdisplays_vram", "Unavailable"),
+                    "vram": gpu.get("spdisplays_vram", "Unknown"),
                 }
             )
 
@@ -92,7 +91,7 @@ class MacOS(BaseEngine):
                 )
                 displays.append(
                     {
-                        "brand": display.get("_name", "Unknown brand"),
+                        "name": display.get("_name", "Unknown"),
                         "display_type" : display.get("spdisplays_display_type", "Unknown")[11:],
                         "resolution" : display.get("_spdisplays_pixels", "Unknown resolution"),
                         "is_main_display" : main_display,
@@ -116,30 +115,59 @@ class MacOS(BaseEngine):
         battery_info = _run_cmd(["system_profiler", "SPPowerDataType"])
 
         return {
-            "current_cycle_count" : battery_info.get("Cycle Count"),
-            "battery_health" : battery_info.get("Maximum Capacity"),
-            "battery_condition": battery_info.get("Condition"),
+            "current_cycle_count" : battery_info.get("Cycle Count", "Unknown cycle count"),
+            "battery_health" : battery_info.get("Maximum Capacity", "Unknown capacity"),
+            "battery_condition": battery_info.get("Condition", "Unknown condition"),
         }
 
     def get_storage_info(self) -> dict:
-        #Check NVMe and SATA.
+        #Check SATA too.
         nvme_info = _run_cmd(["system_profiler", "SPNVMeDataType"], True).get("SPNVMeDataType", [])
-        return {
+        drives = []
+        volumes = []
 
-        }
+        for nvmes in nvme_info:
+            controller = nvmes.get("_name", "")
+            items = nvmes.get("_items", [])
+
+            for drive in items:
+                drives.append(
+                    {
+                        "name": drive.get("_name", "Unknown"),
+                        "model" : drive.get("device_model", "Unknown model"),
+                        "detachable" : drive.get("detachable_drive", "Unknown").capitalize(),
+                        "removable" : drive.get("removable_media", "Unknown").capitalize(),
+                        "partition_map_type" : drive.get("partition_map_type", "Unknown").replace("_", " ").title(),
+                        "drive_type" : "NVMe",
+                        "size" : drive.get("size", "Unknown"),
+                        "smart_status" : drive.get("smart_status", "").capitalize(),
+                    }
+                )
+                drive_volumes = drive.get("volumes", [])
+                for volume in drive_volumes:
+                    volumes.append(
+                        {
+                            "name": volume.get("_name", "Unknown"),
+                            "bsd_name": volume.get("bsd_name", "Unknown"),
+                            "partition_type": volume.get("iocontent", "Unknown").replace("_", " "),
+                            "size": volume.get("size", "Unknown"),
+                        }
+                    )
+
+        return {"nvme_controller": controller, "drives": drives, "volumes": volumes}
 
     def get_os_info(self) -> dict:
         os_info = _run_cmd(["sw_vers"])
+        firmware_info = _run_cmd(["system_profiler", "SPHardwareDataType"])
 
         return {
-            #"firmware_version": subprocess.check_output(["uname", "-m"], stderr=subprocess.DEVNULL).decode().strip(),
-            #Need optimized firmware fetcher.
             "os_version": f"{os_info.get("ProductName")} {os_info.get("ProductVersion")}",
             "os_build": os_info.get("BuildVersion"),
             "kernel_version": subprocess.check_output(["uname", "-r"], stderr=subprocess.DEVNULL).decode().strip(),
+            "system_firmware_version": firmware_info.get("System Firmware Version"),
+            "os_loader_version": firmware_info.get("OS Loader Version"),
         }
 
-    #Need to figure out what counts as misc info and what can be its own thing, may do model and os seperate.
     def get_model_info(self) -> dict:
         model_info = _run_cmd(["system_profiler", "SPHardwareDataType"])
 
@@ -150,8 +178,6 @@ class MacOS(BaseEngine):
             "serial_number" : model_info.get("Serial Number (system)"),
         }
 
-    #Add storage systems, need to be aware about multiple drives installed and filesystems.
     #Add WiFi, Ethernet, and Bluetooth stuff?
-    #Logs?
     #Audio devices?
     #Add usb and thunderbolt ports?

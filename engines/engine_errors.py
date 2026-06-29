@@ -1,0 +1,1 @@
+#Add custom error handling for commands.
