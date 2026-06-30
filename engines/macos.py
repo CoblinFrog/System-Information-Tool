@@ -121,40 +121,51 @@ class MacOS(BaseEngine):
         }
 
     def get_storage_info(self) -> dict:
-        #Check SATA too.
-        nvme_info = _run_cmd(["system_profiler", "SPNVMeDataType"], True).get("SPNVMeDataType", [])
+        target_datatypes = ["SPNVMeDataType", "SPSATADataType"]
+
+        controller = "Unknown Controller"
         drives = []
         volumes = []
 
-        for nvmes in nvme_info:
-            controller = nvmes.get("_name", "")
-            items = nvmes.get("_items", [])
+        for datatype in target_datatypes:
+            raw_payload = _run_cmd(["system_profiler", datatype], True)
+            if not raw_payload:
+                continue
 
-            for drive in items:
-                drives.append(
-                    {
-                        "name": drive.get("_name", "Unknown"),
-                        "model" : drive.get("device_model", "Unknown model"),
-                        "detachable" : drive.get("detachable_drive", "Unknown").capitalize(),
-                        "removable" : drive.get("removable_media", "Unknown").capitalize(),
-                        "partition_map_type" : drive.get("partition_map_type", "Unknown").replace("_", " ").title(),
-                        "drive_type" : "NVMe",
-                        "size" : drive.get("size", "Unknown"),
-                        "smart_status" : drive.get("smart_status", "").capitalize(),
-                    }
-                )
-                drive_volumes = drive.get("volumes", [])
-                for volume in drive_volumes:
-                    volumes.append(
+            info_list = raw_payload.get(datatype, [])
+
+            for controller_entry in info_list:
+                controller = controller_entry.get("_name", "Unknown Controller")
+                items = controller_entry.get("_items", [])
+
+                for drive in items:
+                    drive_type = "NVMe" if datatype == "SPNVMeDataType" else "SATA"
+
+                    drives.append(
                         {
-                            "name": volume.get("_name", "Unknown"),
-                            "bsd_name": volume.get("bsd_name", "Unknown"),
-                            "partition_type": volume.get("iocontent", "Unknown").replace("_", " "),
-                            "size": volume.get("size", "Unknown"),
+                            "name": drive.get("_name", "Unknown"),
+                            "model": drive.get("device_model", "Unknown model"),
+                            "detachable": str(drive.get("detachable_drive", "Unknown")).capitalize(),
+                            "removable": str(drive.get("removable_media", "Unknown")).capitalize(),
+                            "partition_map_type": drive.get("partition_map_type", "Unknown").replace("_", " ").title(),
+                            "drive_type": drive_type,
+                            "size": drive.get("size", "Unknown"),
+                            "smart_status": drive.get("smart_status", "N/A").capitalize(),
                         }
                     )
 
-        return {"nvme_controller": controller, "drives": drives, "volumes": volumes}
+                    drive_volumes = drive.get("volumes", [])
+                    for volume in drive_volumes:
+                        volumes.append(
+                            {
+                                "name": volume.get("_name", "Unknown"),
+                                "bsd_name": volume.get("bsd_name", "Unknown"),
+                                "partition_type": volume.get("iocontent", "Unknown").replace("_", " "),
+                                "size": volume.get("size", "Unknown"),
+                            }
+                        )
+
+        return {"controller": controller, "drives": drives, "volumes": volumes}
 
     def get_os_info(self) -> dict:
         os_info = _run_cmd(["sw_vers"])
