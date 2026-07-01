@@ -34,6 +34,7 @@ class MacOS(BaseEngine):
         cpu_info = _run_cmd(["sysctl", "hw", "machdep.cpu"])
 
         try:
+            #Add kb and mb stuff
             l1i = int(cpu_info.get("hw.l1icachesize")) // 1024
             l1d = int(cpu_info.get("hw.l1dcachesize")) // 1024
             l2 = int(cpu_info.get("hw.l2cachesize")) // 1024
@@ -122,8 +123,6 @@ class MacOS(BaseEngine):
 
     def get_storage_info(self) -> dict:
         target_datatypes = ["SPNVMeDataType", "SPSATADataType"]
-
-        controller = "Unknown Controller"
         drives = []
         volumes = []
 
@@ -144,7 +143,6 @@ class MacOS(BaseEngine):
                     drives.append(
                         {
                             "name": drive.get("_name", "Unknown"),
-                            "model": drive.get("device_model", "Unknown model"),
                             "detachable": str(drive.get("detachable_drive", "Unknown")).capitalize(),
                             "removable": str(drive.get("removable_media", "Unknown")).capitalize(),
                             "partition_map_type": drive.get("partition_map_type", "Unknown").replace("_", " ").title(),
@@ -165,7 +163,7 @@ class MacOS(BaseEngine):
                             }
                         )
 
-        return {"controller": controller, "drives": drives, "volumes": volumes}
+        return {"drives": drives, "volumes": volumes}
 
     def get_os_info(self) -> dict:
         os_info = _run_cmd(["sw_vers"])
