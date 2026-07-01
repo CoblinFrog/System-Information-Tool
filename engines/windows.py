@@ -287,9 +287,8 @@ class Windows(BaseEngine):
 
             drives.append({
                 "name": disk.get("FriendlyName", "Unknown Drive"),
-                "detachable": "Yes" if bus == 7 else "No",
-                "removable": "No",
-                "drive_type": f"{media_types.get(disk.get('MediaType', 0), 'Unknown')} ({bus_types.get(bus, 'Unknown')})",
+                "drive_type": media_types.get(disk.get('MediaType', 0), 'Unknown'),
+                "connection_type" : bus_types.get(bus, 'Unknown'),
                 "size": f"{int(disk.get('Size', 0)) // (1024 ** 3)} GB",
                 "smart_status": clean_health  # Now outputs clean string tags
             })
@@ -348,11 +347,7 @@ class Windows(BaseEngine):
         board_vendor = board_info.get("Manufacturer", "Unknown")
         board_model = board_info.get("Product", "Unknown")
 
-        is_custom_build = sys_model.strip().lower() == board_model.strip().lower()
-        display_system_type = "Custom Desktop" if is_custom_build else "Pre-built / Laptop"
-
         return {
-            "model_type": display_system_type,
             "model_brand": sys_vendor,
             "model_name": sys_model,
             "motherboard_manufacturer": board_vendor,

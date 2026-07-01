@@ -134,7 +134,6 @@ class MacOS(BaseEngine):
             info_list = raw_payload.get(datatype, [])
 
             for controller_entry in info_list:
-                controller = controller_entry.get("_name", "Unknown Controller")
                 items = controller_entry.get("_items", [])
 
                 for drive in items:
@@ -143,8 +142,6 @@ class MacOS(BaseEngine):
                     drives.append(
                         {
                             "name": drive.get("_name", "Unknown"),
-                            "detachable": str(drive.get("detachable_drive", "Unknown")).capitalize(),
-                            "removable": str(drive.get("removable_media", "Unknown")).capitalize(),
                             "partition_map_type": drive.get("partition_map_type", "Unknown").replace("_", " ").title(),
                             "drive_type": drive_type,
                             "size": drive.get("size", "Unknown"),
