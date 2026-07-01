@@ -2,7 +2,6 @@ import json
 import subprocess
 from engines.base import BaseEngine
 
-
 # Helper function tailored for Windows PowerShell CIM queries
 def _run_pwsh(cim_class: str, namespace: str = "root\\cimv2", filter_query: str = None) -> list:
     """
@@ -139,7 +138,6 @@ class Windows(BaseEngine):
             except:
                 pass
 
-            # Extract the raw Device & Vendor ID pattern to match with the 64-bit registry profile
             gpu_match_id = "&".join(pnp_id.split("&")[0:2]) if pnp_id else ""
 
             vram_str = "Unknown"
@@ -198,34 +196,64 @@ class Windows(BaseEngine):
         total_capacity_bytes = sum(int(stick.get("Capacity", 0)) for stick in memory_modules)
         total_gb = total_capacity_bytes // (1024 ** 3)
 
-        first_stick = memory_modules[0]
+        # Standard JEDEC hex mappings for manufacturers
+        jedec_map = {
+            "0443": "Crucial / Micron",
+            "0198": "Kingston",
+            "00CE": "Samsung",
+            "02FE": "Elpida",
+            "014F": "Transcend",
+            "059B": "Crucial",
+            "AD00": "SK Hynix",
+            "80AD": "SK Hynix"
+        }
 
-        # Fetch Memory Speed (ConfiguredClockSpeed represents the active running speed profile)
-        speed_val = first_stick.get("ConfiguredClockSpeed") or first_stick.get("Speed", "Unknown")
+        manufacturers = []
+        speeds = set()
+        types = set()
 
-        mem_type_code = first_stick.get("SMBIOSMemoryType", 0)
         type_mapping = {24: "DDR3", 26: "DDR4", 34: "DDR5"}
+
+        for stick in memory_modules:
+            # Clean up the manufacturer identifier string
+            raw_mfg = str(stick.get("Manufacturer", "Unknown")).strip()
+            # Clean up known hex leading string wrappers
+            clean_mfg = raw_mfg.replace("0x", "").upper()
+            resolved_mfg = jedec_map.get(clean_mfg, raw_mfg)
+
+            if resolved_mfg not in manufacturers and resolved_mfg != "Unknown":
+                manufacturers.append(resolved_mfg)
+
+            speed_val = stick.get("ConfiguredClockSpeed") or stick.get("Speed")
+            if speed_val:
+                speeds.add(f"{speed_val} MT/s")
+
+            mem_code = stick.get("SMBIOSMemoryType", 0)
+            types.add(type_mapping.get(mem_code, f"Type {mem_code}"))
+
+        mfg_string = ", ".join(manufacturers) if manufacturers else "Unknown"
+        speed_string = "/".join(speeds) if speeds else "Unknown"
+        type_string = "/".join(types) if types else "Unknown"
 
         return {
             "total_memory": f"{total_gb} GB",
-            "speed": f"{speed_val} MT/s" if str(speed_val).isdigit() else "Unknown",
-            "memory_type": type_mapping.get(mem_type_code, f"Type Code {mem_type_code}"),
-            "memory_manufacturer": first_stick.get("Manufacturer", "Unknown"),
+            "speed": speed_string,
+            "memory_type": type_string,
+            "memory_manufacturer": mfg_string,
         }
 
+    #Need a better function, not much information.
     def get_battery_info(self) -> dict:
         battery_info = _run_pwsh("Win32_Battery")
 
         if not battery_info:
             return {
-                "battery_health": "N/A",
                 "battery_condition": "N/A"
             }
 
         primary_battery = battery_info[0]
 
         return {
-            "battery_health": f"{primary_battery.get('EstimatedChargeRemaining', 'Unknown')}%",
             "battery_condition": primary_battery.get("Status", "Unknown")
         }
 
