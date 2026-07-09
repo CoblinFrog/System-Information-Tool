@@ -33,14 +33,6 @@ class MacOS(BaseEngine):
     def get_cpu_info(self) -> dict:
         cpu_info = _run_cmd(["sysctl", "hw", "machdep.cpu"])
 
-        try:
-            #Add kb and mb stuff
-            l1i = int(cpu_info.get("hw.l1icachesize")) // 1024
-            l1d = int(cpu_info.get("hw.l1dcachesize")) // 1024
-            l2 = int(cpu_info.get("hw.l2cachesize")) // 1024
-        except ValueError, TypeError:
-            l1i, l1d, l2 = 0, 0, 0
-
         return {
             "core_count": cpu_info.get("hw.physicalcpu"),
             "p_core_count" : cpu_info.get("hw.perflevel0.physicalcpu"),
@@ -49,9 +41,9 @@ class MacOS(BaseEngine):
             "architecture": subprocess.check_output(["uname", "-m"], stderr=subprocess.DEVNULL).decode().strip(),
             "frequency" : cpu_info.get("hw.cpufrequency"),
             # Cache sizes below may be incorrect and inaccurate, need to sort which is which
-            "l1_instruction_cache" : l1i,
-            "l1_data_cache": l1d,
-            "l2_cache" : l2
+            "l1_instruction_cache" : self.format_size_units(cpu_info.get("hw.l1icachesize")),
+            "l1_data_cache": self.format_size_units(cpu_info.get("hw.l1dcachesize")),
+            "l2_cache" : self.format_size_units(cpu_info.get("hw.l2cachesize"))
         }
 
     def get_graphics_info(self) -> dict:

@@ -1,5 +1,6 @@
 import json
 import subprocess
+import re
 from engines.base import BaseEngine
 
 # Helper function tailored for Windows PowerShell CIM queries
@@ -12,10 +13,7 @@ def _run_pwsh(cim_class: str, namespace: str = "root\\cimv2", filter_query: str 
     cmd = f"@((Get-CimInstance -Namespace '{namespace}' -ClassName '{cim_class}'{filter_str})) | ConvertTo-Json -Compress"
 
     try:
-        raw_output = subprocess.check_output(
-            ["powershell", "-NoProfile", "-Command", cmd],
-            stderr=subprocess.DEVNULL
-        ).decode().strip()
+        raw_output = subprocess.check_output(["powershell", "-NoProfile", "-Command", cmd],stderr=subprocess.DEVNULL).decode().strip()
 
         if not raw_output:
             return []
@@ -27,16 +25,6 @@ def _run_pwsh(cim_class: str, namespace: str = "root\\cimv2", filter_query: str 
 
     except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError):
         return []
-
-
-def _format_cache(kb_size: int) -> str:
-    """Helper to format cache sizes into readable KB or MB."""
-    if kb_size == 0:
-        return "Unknown"
-    elif kb_size < 1024:
-        return f"{kb_size} KB"
-    else:
-        return f"{kb_size // 1024} MB"
 
 
 class Windows(BaseEngine):
@@ -59,9 +47,9 @@ class Windows(BaseEngine):
         arch = "x86_64" if arch_code == 9 else "ARM64" if arch_code == 12 else "x86"
 
         # Sum up cache levels across all installed processors
-        l1_kb = sum(c.get("InstalledSize", 0) for c in cache_data if c.get("Level") == 3)
-        l2_kb = sum(c.get("InstalledSize", 0) for c in cache_data if c.get("Level") == 4)
-        l3_kb = sum(c.get("InstalledSize", 0) for c in cache_data if c.get("Level") == 5)
+        l1 = sum(c.get("InstalledSize", 0) for c in cache_data if c.get("Level") == 3)
+        l2 = sum(c.get("InstalledSize", 0) for c in cache_data if c.get("Level") == 4)
+        l3 = sum(c.get("InstalledSize", 0) for c in cache_data if c.get("Level") == 5)
 
         return {
             "core_count": total_cores,
@@ -69,9 +57,9 @@ class Windows(BaseEngine):
             "brand": primary_cpu.get("Name", "Unknown CPU"),
             "architecture": arch,
             "base_frequency": f"{primary_cpu.get('MaxClockSpeed', 0)/1000} GHz",
-            "l1_cache": _format_cache(l1_kb),
-            "l2_cache": _format_cache(l2_kb),
-            "l3_cache": _format_cache(l3_kb)
+            "l1_cache": self.format_size_units(l1, "kb"),
+            "l2_cache": self.format_size_units(l2, "kb"),
+            "l3_cache": self.format_size_units(l3, "kb"),
         }
 
     def get_graphics_info(self) -> dict:
@@ -118,7 +106,6 @@ class Windows(BaseEngine):
 
             vendor = "Unknown Vendor"
             try:
-                import re
                 subsys_match = re.search(r"SUBSYS_([0-9A-Fa-f]{4})([0-9A-Fa-f]{4})", pnp_id)
                 if not subsys_match:
                     subsys_match = re.search(r"SUBSYS&[0-9A-Fa-f_]*&REV_[0-9A-Fa-f_]*", pnp_id)  # alternative formats
@@ -156,6 +143,7 @@ class Windows(BaseEngine):
                     if reg_out:
                         bytes_val = int(reg_out)
                         vram_str = f"{round(bytes_val // (1024 ** 3), 1)} GB"
+                        self.format_size_units()
                 except:
                     vram_str = "Unknown"
 
@@ -193,8 +181,8 @@ class Windows(BaseEngine):
             return {"total_memory": "Unknown", "memory_type": "Unknown", "memory_manufacturer": "Unknown",
                     "speed": "Unknown"}
 
-        total_capacity_bytes = sum(int(stick.get("Capacity", 0)) for stick in memory_modules)
-        total_gb = total_capacity_bytes // (1024 ** 3)
+        total_capacity = sum(int(stick.get("Capacity", 0)) for stick in memory_modules)
+        total_gb = self.format_size_units(total_capacity, "bytes")
 
         # Standard JEDEC hex mappings for manufacturers
         jedec_map = {
@@ -289,8 +277,8 @@ class Windows(BaseEngine):
                 "name": disk.get("FriendlyName", "Unknown Drive"),
                 "drive_type": media_types.get(disk.get('MediaType', 0), 'Unknown'),
                 "connection_type" : bus_types.get(bus, 'Unknown'),
-                "size": f"{int(disk.get('Size', 0)) // (1024 ** 3)} GB",
-                "smart_status": clean_health  # Now outputs clean string tags
+                "size": self.format_size_units(int(disk.get('Size', 0)), "bytes"),
+                "smart_status": clean_health
             })
 
         for vol in volumes_data:
@@ -304,7 +292,7 @@ class Windows(BaseEngine):
                 "name": vol.get("FileSystemLabel") or "Local Disk",
                 "drive_letter": drive_letter,
                 "partition_type": vol.get("FileSystem", "Unknown"),
-                "size": f"{int(vol.get('Size', 0)) // (1024 ** 3)} GB"
+                "size": self.format_size_units(int(vol.get('Size', 0)), "bytes"),
             })
 
         return {"drives": drives, "volumes": volumes}
@@ -319,8 +307,7 @@ class Windows(BaseEngine):
         # Fetch BIOS Mode (UEFI vs Legacy) via Get-ComputerInfo
         try:
             bios_cmd = "(Get-ComputerInfo -Property BiosFirmwareType).BiosFirmwareType"
-            bios_mode = subprocess.check_output(["powershell", "-NoProfile", "-Command", bios_cmd],
-                                                stderr=subprocess.DEVNULL).decode().strip()
+            bios_mode = subprocess.check_output(["powershell", "-NoProfile", "-Command", bios_cmd], stderr=subprocess.DEVNULL).decode().strip()
             if not bios_mode: bios_mode = "Unknown"
         except:
             bios_mode = "Unknown"
