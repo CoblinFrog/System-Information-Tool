@@ -224,7 +224,7 @@ class Windows(BaseEngine):
         type_string = "/".join(types) if types else "Unknown"
 
         return {
-            "total_memory": f"{total_gb} GB",
+            "total_memory": total_gb,
             "speed": speed_string,
             "memory_type": type_string,
             "memory_manufacturer": mfg_string,
